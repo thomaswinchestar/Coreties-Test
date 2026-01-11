@@ -50,7 +50,9 @@ export default function CompanyDetail({ companyName, companyRole }: CompanyDetai
       </p>
       {detail.website && (
         <a
-          href={detail.website}
+          href={detail.website.startsWith("http") ? detail.website : `https://${detail.website}`}
+          target="_blank"
+          rel="noopener noreferrer"
           className="text-sm text-blue-600 dark:text-blue-400 hover:underline mb-6 block"
         >
           {detail.website}

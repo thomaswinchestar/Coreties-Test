@@ -34,7 +34,17 @@ export default function CompaniesPage() {
     role: "importer" | "exporter";
   } | null>(null);
   const [page, setPage] = useState(1);
+  const [search, setSearch] = useState("");
+  const [searchInput, setSearchInput] = useState("");
+  const [roleFilter, setRoleFilter] = useState("");
+  const [countryFilter, setCountryFilter] = useState("");
   const limit = 20;
+
+  const { data: countriesData } = useSWR<{ data: string[] }>(
+    "/api/companies/countries",
+    fetcher
+  );
+  const countries = countriesData?.data || [];
 
   const { data: statsData, isLoading: statsLoading } = useSWR<GlobalStats>(
     "/api/analytics/stats",
@@ -49,10 +59,33 @@ export default function CompaniesPage() {
     data: MonthlyWeight[];
   }>("/api/analytics/monthly", fetcher);
 
+  const buildCompaniesUrl = () => {
+    const params = new URLSearchParams();
+    params.set("page", page.toString());
+    params.set("limit", limit.toString());
+    if (search) params.set("search", search);
+    if (roleFilter) params.set("role", roleFilter);
+    if (countryFilter) params.set("country", countryFilter);
+    return `/api/companies?${params.toString()}`;
+  };
+
   const { data: companiesData, isLoading: companiesLoading } = useSWR<PaginatedCompanies>(
-    `/api/companies?page=${page}&limit=${limit}`,
+    buildCompaniesUrl(),
     fetcher
   );
+
+  const handleSearch = () => {
+    setSearch(searchInput);
+    setPage(1);
+  };
+
+  const handleClearFilters = () => {
+    setSearch("");
+    setSearchInput("");
+    setRoleFilter("");
+    setCountryFilter("");
+    setPage(1);
+  };
 
   const stats = statsData || { totalImporters: 0, totalExporters: 0 };
   const topCommodities = commoditiesData?.data || [];
@@ -172,12 +205,69 @@ export default function CompaniesPage() {
             {/* Company List (Left/Main) */}
             <div className="lg:col-span-2 bg-white dark:bg-zinc-900 rounded-lg shadow">
               <div className="p-6 border-b border-zinc-200 dark:border-zinc-800">
-                <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
-                  Company List
-                </h2>
-                <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
-                  Click a company to view details
-                </p>
+                <div className="flex items-center justify-between mb-4">
+                  <div>
+                    <h2 className="text-lg font-semibold text-zinc-900 dark:text-zinc-50">
+                      Company List
+                    </h2>
+                    <p className="text-sm text-zinc-500 dark:text-zinc-400 mt-1">
+                      Click a company to view details
+                    </p>
+                  </div>
+                  {(search || roleFilter || countryFilter) && (
+                    <button
+                      onClick={handleClearFilters}
+                      className="text-sm text-blue-500 hover:text-blue-600"
+                    >
+                      Clear filters
+                    </button>
+                  )}
+                </div>
+                <div className="flex flex-wrap gap-3">
+                  <div className="flex flex-1 min-w-[200px]">
+                    <input
+                      type="text"
+                      placeholder="Search company name..."
+                      value={searchInput}
+                      onChange={(e) => setSearchInput(e.target.value)}
+                      onKeyDown={(e) => e.key === "Enter" && handleSearch()}
+                      className="flex-1 px-3 py-2 text-sm rounded-l border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                    />
+                    <button
+                      onClick={handleSearch}
+                      className="px-4 py-2 text-sm bg-blue-500 text-white rounded-r hover:bg-blue-600"
+                    >
+                      Search
+                    </button>
+                  </div>
+                  <select
+                    value={roleFilter}
+                    onChange={(e) => {
+                      setRoleFilter(e.target.value);
+                      setPage(1);
+                    }}
+                    className="px-3 py-2 text-sm rounded border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  >
+                    <option value="">All Roles</option>
+                    <option value="importer">Importers</option>
+                    <option value="exporter">Exporters</option>
+                  </select>
+                  <select
+                    value={countryFilter}
+                    onChange={(e) => {
+                      setCountryFilter(e.target.value);
+                      setPage(1);
+                    }}
+                    className="px-3 py-2 text-sm rounded border border-zinc-300 dark:border-zinc-700 bg-white dark:bg-zinc-800 text-zinc-900 dark:text-zinc-50 focus:outline-none focus:ring-1 focus:ring-blue-500"
+                  >
+                    <option value="">All Countries</option>
+                    {countries.map((country) => (
+                      <option key={country} value={country}>
+                        {country}
+                      </option>
+                    ))}
+                  </select>
+                </div>
               </div>
               <div className="overflow-x-auto">
                 <table className="w-full">
