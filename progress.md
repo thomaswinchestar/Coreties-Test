@@ -6,6 +6,14 @@
 
 ---
 
+## Demo
+
+![Dashboard Screenshot](screenshot-demo.png)
+
+**Video Demo:** [Google Drive](https://drive.google.com/drive/folders/1lx0xH5d5HROrsdRuy4ZRIHzzPmdOb6Q9?usp=sharing)
+
+---
+
 ## Overview
 
 Full-stack analytics dashboard transforming shipment data into company insights using DuckDB SQL, Next.js API routes, and React with SWR.

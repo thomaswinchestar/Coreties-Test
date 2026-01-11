@@ -1,5 +1,13 @@
 # Full-Stack Technical Assessment
 
+## Demo
+
+![Dashboard Screenshot](screenshot-demo.png)
+
+**Video Demo:** [Google Drive](https://drive.google.com/drive/folders/1lx0xH5d5HROrsdRuy4ZRIHzzPmdOb6Q9?usp=sharing)
+
+---
+
 ## Quick Start
 
 ```bash
